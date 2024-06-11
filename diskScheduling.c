@@ -4,6 +4,7 @@
 #include <math.h>
 
 #define QUEUE_SIZE 8
+#define SCAN_QUEUE_SIZE QUEUE_SIZE+1
 
 void SSTF(int*, int*, int, int, int);
 void SCAN(int*, int*, int, int, int);
@@ -11,30 +12,30 @@ void LOOK(int*, int*, int, int, int);
 void calculateVarience(int*, int);
 
 int main() {
-	int queue[QUEUE_SIZE] = {98, 183, 37, 122, 14, 124, 65, 67};
-	int localizedQueue[QUEUE_SIZE] = {30, 32, 35, 33, 40, 37, 38, 36};
-	int randomQueue[QUEUE_SIZE] = {0,}; 
+	int queue[QUEUE_SIZE] = { 98, 183, 37, 122, 14, 124, 65, 67 };
+	int localizedQueue[QUEUE_SIZE] = { 30, 32, 35, 33, 40, 37, 38, 36 };
+	int randomQueue[QUEUE_SIZE] = { 0, };
 
-	int seekDist[QUEUE_SIZE], seekIdx = 0;
+	int seekDist[QUEUE_SIZE], scanSeekDist[SCAN_QUEUE_SIZE], seekIdx = 0;
 	int head = 53, result = 0;
 
 	printf("교과서의 요청 시나리오\n");
-	SSTF(queue, seekDist, seekIdx, head, result);	
-	SCAN(queue, seekDist, seekIdx, head, result);
+	SSTF(queue, seekDist, seekIdx, head, result);
+	SCAN(queue, scanSeekDist, seekIdx, head, result);
 	LOOK(queue, seekDist, seekIdx, head, result);
 
 	printf("인접 위주 요청 시나리오\n");
-	SSTF(localizedQueue, seekDist, seekIdx, head, result);	
-	SCAN(localizedQueue, seekDist, seekIdx, head, result);
+	SSTF(localizedQueue, seekDist, seekIdx, head, result);
+	SCAN(localizedQueue, scanSeekDist, seekIdx, head, result);
 	LOOK(localizedQueue, seekDist, seekIdx, head, result);
 
 	printf("무작위 요청 시나리오\n");
 	srand(time(NULL));
-	for (int i = 0; i < QUEUE_SIZE; i++) randomQueue[i] = (rand() % 199) + 1;	
-	SSTF(randomQueue, seekDist, seekIdx, head, result);	
-	SCAN(randomQueue, seekDist, seekIdx, head, result);
+	for (int i = 0; i < QUEUE_SIZE; i++) randomQueue[i] = (rand() % 199) + 1;
+	SSTF(randomQueue, seekDist, seekIdx, head, result);
+	SCAN(randomQueue, scanSeekDist, seekIdx, head, result);
 	LOOK(randomQueue, seekDist, seekIdx, head, result);
-	
+
 	return 0;
 }
 
@@ -48,11 +49,11 @@ int main() {
  seekDist : seek distance를 저장하는 배열
  seekIdx : seekDist 배열의 인덱스
  head : 현재 헤드를 저장하는 변수
- result : 결과를 출력하기 위한 변수 
+ result : 결과를 출력하기 위한 변수
 @variable
  reqIdx : 서비스될 요청의 인덱스를 저장하는 변수
 */
-void SSTF(int *queue, int *seekDist, int seekIdx, int head, int result) {
+void SSTF(int* queue, int* seekDist, int seekIdx, int head, int result) {
 	printf("SSTF scheduling algorithm\n");
 
 	int reqIdx = 0;
@@ -62,12 +63,12 @@ void SSTF(int *queue, int *seekDist, int seekIdx, int head, int result) {
 		int tmp = 0;
 
 		for (int i = reqIdx; i < 8; i++) {
-			if (sst == 0 || abs(head-queue[i]) < sst) {
+			if (sst == 0 || abs(head - queue[i]) < sst) {
 				tmp = queue[reqIdx];
 				queue[reqIdx] = queue[i];
-				queue[i] = tmp; 
+				queue[i] = tmp;
 
-				sst = abs(head-queue[reqIdx]);
+				sst = abs(head - queue[reqIdx]);
 			}
 		}
 
@@ -95,7 +96,7 @@ void SSTF(int *queue, int *seekDist, int seekIdx, int head, int result) {
  seekDist : seek distance를 저장하는 배열
  seekIdx : seekDist 배열의 인덱스
  head : 현재 헤드를 저장하는 변수
- result : 결과를 출력하기 위한 변수 
+ result : 결과를 출력하기 위한 변수
 
 @variable
  reqIdx : 서비스될 요청의 인덱스를 저장하는 변수
@@ -104,24 +105,22 @@ void SSTF(int *queue, int *seekDist, int seekIdx, int head, int result) {
  greater : 시작 헤드보다 큰 수 배열
  reach : 이동 경로의 끝에 도달했는가의 여부를 확인하기 위한 변수. 요청 큐의 크기와 같다면 끝에 도달하지 않은 것이다.
 */
-void SCAN(int *queue, int *seekDist, int seekIdx, int head, int result) {
+void SCAN(int* queue, int* seekDist, int seekIdx, int head, int result) {
 	printf("SCAN scheduling algorithm\n");
 
-	seekDist = malloc(sizeof(int) * QUEUE_SIZE+2);
-
 	int reqIdx = 0; // reqIdx : 서비스될 요청을 저장하는 변수
-	int reOrder[QUEUE_SIZE] = {0,};
+	int reOrder[QUEUE_SIZE] = { 0, };
 	int reach = 0;
 	int less = 0, greater = QUEUE_SIZE;
 
 	for (int i = 0; i < QUEUE_SIZE; i++) {
-		if (queue[i] < head) { reOrder[less] = queue[i]; less++; reach--;}
-		else { reOrder[greater-1] = queue[i]; greater--; reach++;}
+		if (queue[i] < head) { reOrder[less] = queue[i]; less++; reach--; }
+		else { reOrder[greater - 1] = queue[i]; greater--; reach++; }
 	}
-	
+
 	int tmp = 0;
 	for (int i = 0; i < less; i++) {
-		for (int j = 0; j < less-1; j++) {
+		for (int j = 0; j < less - 1; j++) {
 			if (reOrder[i] > reOrder[j]) {
 				tmp = reOrder[i];
 				reOrder[i] = reOrder[j];
@@ -130,7 +129,7 @@ void SCAN(int *queue, int *seekDist, int seekIdx, int head, int result) {
 		}
 	}
 	for (int i = greater; i < QUEUE_SIZE; i++) {
-		for (int j = greater; j < QUEUE_SIZE-1; j++) {
+		for (int j = greater; j < QUEUE_SIZE - 1; j++) {
 			if (reOrder[i] < reOrder[j]) {
 				tmp = reOrder[i];
 				reOrder[i] = reOrder[j];
@@ -143,28 +142,28 @@ void SCAN(int *queue, int *seekDist, int seekIdx, int head, int result) {
 	int i = 0;
 	if (abs(reach) >= QUEUE_SIZE) {
 		while (seekIdx < QUEUE_SIZE) {
-		if (scan == less) {
-			seekDist[seekIdx] = abs(head - 0);
-			seekIdx++;
-			seekDist[seekIdx] = abs(0 - reOrder[greater]);
-		}
-		else seekDist[seekIdx] = abs(head - reOrder[i]); 
-		
-		head = reOrder[i];
-		seekIdx++;
-		scan++;
-		i++;
-		}
-	}
-	else {
-		while (seekIdx <= QUEUE_SIZE) {
 			if (scan == less) {
 				seekDist[seekIdx] = abs(head - 0);
 				seekIdx++;
 				seekDist[seekIdx] = abs(0 - reOrder[greater]);
 			}
-			else seekDist[seekIdx] = abs(head - reOrder[i]); 
-			
+			else seekDist[seekIdx] = abs(head - reOrder[i]);
+
+			head = reOrder[i];
+			seekIdx++;
+			scan++;
+			i++;
+		}
+	}
+	else {
+		while (seekIdx < SCAN_QUEUE_SIZE) {
+			if (scan == less) {
+				seekDist[seekIdx] = abs(head - 0);
+				seekIdx++;
+				seekDist[seekIdx] = abs(0 - reOrder[greater]);
+			}
+			else seekDist[seekIdx] = abs(head - reOrder[i]);
+
 			head = reOrder[i];
 			seekIdx++;
 			scan++;
@@ -177,8 +176,6 @@ void SCAN(int *queue, int *seekDist, int seekIdx, int head, int result) {
 	}
 	printf("total head movement of %d cylinders.\n", result);
 	calculateVarience(seekDist, seekIdx);
-
-	free(seekDist);
 }
 
 /*
@@ -191,7 +188,7 @@ void SCAN(int *queue, int *seekDist, int seekIdx, int head, int result) {
  seekDist : seek distance를 저장하는 배열
  seekIdx : seekDist 배열의 인덱스
  head : 현재 헤드를 저장하는 변수
- result : 결과를 출력하기 위한 변수 
+ result : 결과를 출력하기 위한 변수
 
 @variable
  reqIdx : 서비스될 요청의 인덱스를 저장하는 변수
@@ -199,20 +196,20 @@ void SCAN(int *queue, int *seekDist, int seekIdx, int head, int result) {
  less : 시작 헤드보다 작은 수 배열
  greater : 시작 헤드보다 큰 수 배열
 */
-void LOOK(int *queue, int *seekDist, int seekIdx, int head, int result) {
+void LOOK(int* queue, int* seekDist, int seekIdx, int head, int result) {
 	printf("LOOK scheduling algorithm\n");
 
 	int reqIdx = 0; // reqIdx : 서비스될 요청을 저장하는 변수
-	int reOrder[QUEUE_SIZE] = {0,};
+	int reOrder[QUEUE_SIZE] = { 0, };
 
 	int less = 0, greater = QUEUE_SIZE;
 	for (int i = 0; i < QUEUE_SIZE; i++) {
 		if (queue[i] < head) { reOrder[less] = queue[i]; less++; }
-		else { reOrder[greater-1] = queue[i]; greater--; }
+		else { reOrder[greater - 1] = queue[i]; greater--; }
 	}
 	int tmp = 0;
 	for (int i = 0; i < less; i++) {
-		for (int j = 0; j < less-1; j++) {
+		for (int j = 0; j < less - 1; j++) {
 			if (reOrder[i] > reOrder[j]) {
 				tmp = reOrder[i];
 				reOrder[i] = reOrder[j];
@@ -221,7 +218,7 @@ void LOOK(int *queue, int *seekDist, int seekIdx, int head, int result) {
 		}
 	}
 	for (int i = greater; i < QUEUE_SIZE; i++) {
-		for (int j = greater; j < QUEUE_SIZE-1; j++) {
+		for (int j = greater; j < QUEUE_SIZE - 1; j++) {
 			if (reOrder[i] < reOrder[j]) {
 				tmp = reOrder[i];
 				reOrder[i] = reOrder[j];
@@ -257,26 +254,24 @@ void LOOK(int *queue, int *seekDist, int seekIdx, int head, int result) {
 @
 */
 void calculateVarience(int* seekDist, int seekIdx) {
-	double *responseTimes = (double*)malloc(sizeof(double) * seekIdx);
+	double* responseTimes = (double*)malloc(sizeof(double) * seekIdx);
+	if (responseTimes == NULL) {
+		fprintf(stderr, "error occured");
+		exit(1);
+	}
 	double mean = 0, variance = 0;
 
 	for (int i = 0; i < seekIdx; i++) {
-		responseTimes[i] = (i == 0) ? seekDist[i] : responseTimes[i-1] + seekDist[i];
+		responseTimes[i] = (i == 0) ? seekDist[i] : responseTimes[i - 1] + seekDist[i];
 		mean += responseTimes[i];
 	}
 	mean /= seekIdx;
 
 	for (int i = 0; i < seekIdx; i++) {
-        variance += pow(responseTimes[i] - mean, 2);
-    }
-    variance /= seekIdx;
-	
-	printf("Variance of Response Times : %.1f\n", sqrt(variance));	
+		variance += pow(responseTimes[i] - mean, 2);
+	}
+	variance /= seekIdx;
+
+	printf("Variance of Response Times : %.1f\n", sqrt(variance));
 	free(responseTimes);
 }
-
-
-
-
-
-
