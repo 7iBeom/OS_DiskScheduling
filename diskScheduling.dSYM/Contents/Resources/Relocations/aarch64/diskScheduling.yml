@@ -1,0 +1,11 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     diskScheduling
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100002F78, symSize: 0x21C }
+  - { offsetInCU: 0x4D, offset: 0x4D, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100002F78, symSize: 0x21C }
+  - { offsetInCU: 0xE8, offset: 0xE8, size: 0x8, addend: 0x0, symName: _SSTF, symObjAddr: 0x21C, symBinAddr: 0x100003194, symSize: 0x1D8 }
+  - { offsetInCU: 0x1B4, offset: 0x1B4, size: 0x8, addend: 0x0, symName: _SCAN, symObjAddr: 0x3F4, symBinAddr: 0x10000336C, symSize: 0x540 }
+  - { offsetInCU: 0x32C, offset: 0x32C, size: 0x8, addend: 0x0, symName: _LOOK, symObjAddr: 0x934, symBinAddr: 0x1000038AC, symSize: 0x390 }
+  - { offsetInCU: 0x488, offset: 0x488, size: 0x8, addend: 0x0, symName: _calculateVarience, symObjAddr: 0xCC4, symBinAddr: 0x100003C3C, symSize: 0x1C0 }
+...
